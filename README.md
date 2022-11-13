@@ -113,7 +113,7 @@ Requirements:
 You can install all the dependencies except PyTorch with `pip3`:
 
 ```
-git clone https://github.com/duckietown/gym-duckietown.git
+git clone https://github.com/Altius01/gym_duckietown_mshp.git
 cd gym-duckietown
 pip3 install -e .
 ```
@@ -123,7 +123,7 @@ pip3 install -e .
 Alternatively, you can install all the dependencies, including PyTorch, using Conda as follows. For those trying to use this package on MILA machines, this is the way to go:
 
 ```
-git clone https://github.com/duckietown/gym-duckietown.git
+git clone https://github.com/Altius01/gym_duckietown_mshp.git
 cd gym-duckietown
 conda env create -f environment.yaml
 ```
