@@ -16,6 +16,8 @@ import gym_duckietown
 from gym_duckietown.envs import DuckietownEnv
 from gym_duckietown.wrappers import UndistortWrapper
 
+import cv2
+
 # from experiments.utils import save_img
 
 parser = argparse.ArgumentParser()
@@ -73,11 +75,23 @@ def on_key_press(symbol, modifiers):
 key_handler = key.KeyStateHandler()
 env.unwrapped.window.push_handlers(key_handler)
 
+def solve(obs, action):
+    img = cv2.cvtColor(np.ascontiguousarray(obs), cv2.COLOR_BGR2HSV)
+    h_min = np.array((60, 230, 230), np.uint8)
+    h_max = np.array((70, 255, 255), np.uint8)
+
+    mask = cv2.inRange(img, h_min, h_max)
+
+    cv2.imshow('res', mask)
+    return action
+    
+
 def update(dt):
     """
     This function is called at every frame to handle
     movement/stepping and redrawing
     """
+    obs = None
 
     action = np.array([0.0, 0.0])
 
@@ -96,12 +110,23 @@ def update(dt):
     if key_handler[key.LSHIFT]:
         action *= 1.5
 
-    obs, reward, done, info = env.step(action)
-    print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
+    if obs is not None and np.allclose(action, np.array([0.0, 0.0])):
+        action = solve(obs, action)
 
-    if key_handler[key.RETURN]:
+    obs, reward, done, info = env.step(action)
+    # print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
+
+    if key_handler[key.TAB]:
         from PIL import Image
-        im = Image.fromarray(obs)
+
+        img = cv2.cvtColor(np.ascontiguousarray(obs), cv2.COLOR_BGR2HSV)
+        
+        h_min = np.array((80, 200, 200), np.uint8)
+        h_max = np.array((100, 255, 255), np.uint8)
+
+        mask = cv2.inRange(img, h_min, h_max)
+        output = cv2.bitwise_and(img, img, mask = mask)
+        im = Image.fromarray(output)
 
         im.save('screen.png')
 
@@ -111,6 +136,8 @@ def update(dt):
         env.render()
 
     env.render()
+
+
 
 pyglet.clock.schedule_interval(update, 1.0 / env.unwrapped.frame_rate)
 
